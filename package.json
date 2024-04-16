@@ -2,7 +2,9 @@
   "scripts": {
     "prepare-client": "cd client && npm install && npm run build",
     "prepare-server": "cd server && npm install",
-    "final-start": "npm run prepare-client && npm run prepare-server",
-    "start-server": "cd server && npm run dev && cd ../../client/ && npm start"
+    "run-client": "cd client && npm run start",
+    "run-server": "cd server && npm run dev",
+    "prepare-all": "npm run prepare-client && npm run prepare-server",
+    "start-all": "npm run run-client && npm run run-server"
   }
 }

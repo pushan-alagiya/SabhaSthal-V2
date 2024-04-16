@@ -1,25 +1,24 @@
-import React, { useRef, useState, useEffect } from 'react';
-import styled from 'styled-components';
-import socket from '../../socket';
+import React, { useRef, useState, useEffect } from "react";
+import styled from "styled-components";
+import socket from "../../socket";
 
 const Main = (props) => {
   const roomRef = useRef();
   const userRef = useRef();
   const [err, setErr] = useState(false);
-  const [errMsg, setErrMsg] = useState('');
+  const [errMsg, setErrMsg] = useState("");
 
   useEffect(() => {
-
-    socket.on('FE-error-user-exist', ({ error }) => {
+    socket.on("FE-error-user-exist", ({ error }) => {
       if (!error) {
         const roomName = roomRef.current.value;
         const userName = userRef.current.value;
 
-        sessionStorage.setItem('user', userName);
+        sessionStorage.setItem("user", userName);
         props.history.push(`/room/${roomName}`);
       } else {
         setErr(error);
-        setErrMsg('User name already exist');
+        setErrMsg("User name already exist");
       }
     });
   }, [props.history]);
@@ -30,9 +29,9 @@ const Main = (props) => {
 
     if (!roomName || !userName) {
       setErr(true);
-      setErrMsg('Enter Room Name or User Name');
+      setErrMsg("Enter Room Name or User Name");
     } else {
-      socket.emit('BE-check-user', { roomId: roomName, userName });
+      socket.emit("BE-check-user", { roomId: roomName, userName });
     }
   }
 
@@ -90,7 +89,7 @@ const JoinButton = styled.button`
   border: none;
   border-radius: 15px;
   color: #d8e9ef;
-  background-color: #4ea1d3;
+  background-color: #c34400;
   font-size: 25px;
   font-weight: 500;
 

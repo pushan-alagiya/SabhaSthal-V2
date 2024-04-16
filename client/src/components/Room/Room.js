@@ -1,10 +1,11 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import Peer from "simple-peer";
 import styled from "styled-components";
 import socket from "../../socket";
 import VideoCard from "../Video/VideoCard";
 import BottomBar from "../BottomBar/BottomBar";
 import Chat from "../Chat/Chat";
+import Whiteboard from "../whiteboard/Whiteboard";
 
 const Room = (props) => {
   const currentUser = sessionStorage.getItem("user");
@@ -16,11 +17,44 @@ const Room = (props) => {
   const [displayChat, setDisplayChat] = useState(false);
   const [screenShare, setScreenShare] = useState(false);
   const [showVideoDevices, setShowVideoDevices] = useState(false);
+  const [whiteboardVisible, setWhiteboardVisible] = useState(false); // State variable to manage whiteboard visibility
+  // const [whiteboardStream, setWhiteboardStream] = useState(null); // State variable to manage whiteboard stream
+
+  const whiteboardRef = useRef(); // Define whiteboardRef useRef hook
+
   const peersRef = useRef([]);
   const userVideoRef = useRef();
   const screenTrackRef = useRef();
   const userStream = useRef();
   const roomId = props.match.params.roomId;
+  const canvasRef = useRef(); // Add canvasRef for whiteboard
+
+  // =============================================
+
+  const receiveWhiteboardData = useCallback(
+    (data) => {
+      if (whiteboardRef.current) {
+        whiteboardRef.current.receiveData(data);
+      } else {
+        console.error("Whiteboard reference is not yet initialized.");
+      }
+    },
+    [whiteboardRef]
+  );
+
+  // ============= LEAVE ROOM ==========================
+
+  const goToBack = useCallback(
+    (e) => {
+      e.preventDefault();
+      socket.emit("BE-leave-room", { roomId, leaver: currentUser });
+      sessionStorage.removeItem("user");
+      window.location.href = "/";
+    },
+    [roomId, currentUser]
+  );
+
+  // ============== USE EFFECT ==============================
 
   useEffect(() => {
     // Get Video Devices
@@ -138,10 +172,32 @@ const Room = (props) => {
       });
     });
 
+    socket.on("FE-toggle-whiteboard", ({ whiteboardVisible }) => {
+      setWhiteboardVisible(whiteboardVisible);
+    });
+
+    socket.on("FE-whiteboard-data", ({ data }) => {
+      receiveWhiteboardData(data);
+    });
+
+    if (socket) {
+      socket.on("canvasImage", (dataURL) => {
+        const image = new Image();
+        image.onload = () => {
+          const canvas = canvasRef.current;
+          const ctx = canvas.getContext("2d");
+          ctx.drawImage(image, 0, 0);
+        };
+        image.src = dataURL;
+      });
+    }
+
+    // Clean up whiteboard data event listener and disconnect socket
     return () => {
+      socket.off("whiteboard-data", receiveWhiteboardData);
       socket.disconnect();
     };
-  }, []);
+  }, [currentUser, goToBack, roomId, receiveWhiteboardData]);
 
   // ============= CREATE PEER ==========================
   function createPeer(userId, caller, stream) {
@@ -186,6 +242,7 @@ const Room = (props) => {
     return peer;
   }
 
+  // ============= FIND PEER ==========================
   function findPeer(id) {
     return peersRef.current.find((p) => p.peerID === id);
   }
@@ -204,6 +261,7 @@ const Room = (props) => {
     );
   }
 
+  // ============= WRITE USER NAME ========================
   function writeUserName(userName, index) {
     if (userVideoAudio.hasOwnProperty(userName)) {
       if (!userVideoAudio[userName].video) {
@@ -212,20 +270,13 @@ const Room = (props) => {
     }
   }
 
-  // Open Chat
+  // ============= OPEN CHAT ==========================
   const clickChat = (e) => {
     e.stopPropagation();
     setDisplayChat(!displayChat);
   };
 
-  // BackButton
-  const goToBack = (e) => {
-    e.preventDefault();
-    socket.emit("BE-leave-room", { roomId, leaver: currentUser });
-    sessionStorage.removeItem("user");
-    window.location.href = "/";
-  };
-
+  // ============= TOGGLE AUDIO ==========================
   const toggleCameraAudio = (e) => {
     const target = e.target.getAttribute("data-switch");
 
@@ -259,6 +310,7 @@ const Room = (props) => {
     socket.emit("BE-toggle-camera-audio", { roomId, switchTarget: target });
   };
 
+  // ============= SCREEN SHARING ==========================
   const clickScreenSharing = () => {
     if (!screenShare) {
       navigator.mediaDevices
@@ -312,6 +364,7 @@ const Room = (props) => {
     }
   };
 
+  // ============= EXPAND SHARING ==========================
   const expandScreen = (e) => {
     const elem = e.target;
 
@@ -335,6 +388,7 @@ const Room = (props) => {
     setShowVideoDevices(false);
   };
 
+  // ============= CAMERA TOGGLE ==========================
   let isCameraOn = true;
   const clickCameraDevice = (event) => {
     if (
@@ -383,6 +437,35 @@ const Room = (props) => {
     }
   };
 
+  // ============= WHITEBOARD ==========================
+
+  // Add event listener for receiving whiteboard data from server and broadcasting to peers
+  socket.on("FE-whiteboard-data", ({ data }) => {
+    console.log("Data received ");
+    // Broadcast the received whiteboard data to all other peers
+    receiveWhiteboardData(data);
+  });
+
+  // Modify toggleWhiteboard function to open whiteboard for all peers
+  const toggleWhiteboard = () => {
+    const newWhiteboardVisibleState = !whiteboardVisible;
+    setWhiteboardVisible(newWhiteboardVisibleState);
+
+    // Emit the new state to all peers
+    socket.emit("BE-toggle-whiteboard", {
+      roomId,
+      whiteboardVisible: newWhiteboardVisibleState,
+    });
+  };
+
+  // Add event listener for receiving whiteboard visibility toggle from server and open whiteboard for all peers
+  socket.on("FE-toggle-whiteboard", ({ whiteboardVisible }) => {
+    // Update whiteboard visibility for all peers
+    setWhiteboardVisible(whiteboardVisible);
+  });
+
+  // ============= RETURN (ui) ==========================
+
   return (
     <RoomContainer onClick={clickBackground}>
       <VideoAndBarContainer>
@@ -418,9 +501,19 @@ const Room = (props) => {
           videoDevices={videoDevices}
           showVideoDevices={showVideoDevices}
           setShowVideoDevices={setShowVideoDevices}
+          toggleWhiteboard={toggleWhiteboard} // Pass the toggleWhiteboard function to the BottomBar component
         />
       </VideoAndBarContainer>
       <Chat display={displayChat} roomId={roomId} />
+      {whiteboardVisible && (
+        <Whiteboard
+          socket={socket}
+          canvasRef={canvasRef}
+          roomId={roomId}
+          whiteboardRef={whiteboardRef}
+          onWhiteboardDataReceived={receiveWhiteboardData}
+        />
+      )}
     </RoomContainer>
   );
 };

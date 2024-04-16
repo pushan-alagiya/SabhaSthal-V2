@@ -8,6 +8,16 @@ var cors = require("cors");
 
 app.use(cors());
 
+app.use(function (req, res, next) {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Methods", "GET, PUT, POST");
+  res.header(
+    "Access-Control-Allow-Headers",
+    "Origin, X-Requested-With, Content-Type, Accept"
+  );
+  next();
+});
+
 let socketList = {};
 
 app.use(express.static(path.join(__dirname, "public")));
@@ -111,6 +121,24 @@ io.on("connection", (socket) => {
     socket.broadcast
       .to(roomId)
       .emit("FE-toggle-camera", { userId: socket.id, switchTarget });
+  });
+
+  socket.on("whiteboard-data", ({ roomId, data }) => {
+    // Broadcast the drawing data to all other peers in the same room
+    console.log("Canvas data:", data);
+
+    io.to(roomId).emit("FE-whiteboard-data", { data });
+  });
+
+  // Emit the new state to all peers in the room
+  socket.on("BE-toggle-whiteboard", ({ roomId, whiteboardVisible }) => {
+    console.log(whiteboardVisible);
+    io.to(roomId).emit("FE-toggle-whiteboard", { whiteboardVisible });
+  });
+
+  socket.on("clear-canvas", ({ roomId }) => {
+    // Broadcast the clear-canvas event to all clients in the same room
+    io.to(roomId).emit("clear-canvas", { roomId });
   });
 });
 

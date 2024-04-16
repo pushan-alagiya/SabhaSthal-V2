@@ -1,8 +1,8 @@
-import React from 'react';
-import { BrowserRouter, Route, Switch } from 'react-router-dom';
-import Main from './components/Main/Main';
-import Room from './components/Room/Room'
-import styled from 'styled-components';
+import React from "react";
+import { BrowserRouter, Route, Switch } from "react-router-dom";
+import Main from "./components/Main/Main";
+import Room from "./components/Room/Room";
+import styled from "styled-components";
 
 function App() {
   return (
@@ -25,7 +25,7 @@ const AppContainer = styled.div`
   justify-content: center;
   font-size: calc(8px + 2vmin);
   color: white;
-  background-color: #454552;
+  background-color: #1d1d1d;
   text-align: center;
 `;
 

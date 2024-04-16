@@ -1,39 +1,41 @@
-import React, { useEffect, useState, useRef } from 'react';
-import styled from 'styled-components';
-import socket from '../../socket';
+import React, { useEffect, useState, useRef } from "react";
+import styled from "styled-components";
+import socket from "../../socket";
 
 const Chat = ({ display, roomId }) => {
-  const currentUser = sessionStorage.getItem('user');
+  const currentUser = sessionStorage.getItem("user");
   const [msg, setMsg] = useState([]);
   const messagesEndRef = useRef(null);
   const inputRef = useRef();
-  
+
   useEffect(() => {
-    socket.on('FE-receive-message', ({ msg, sender }) => {
+    socket.on("FE-receive-message", ({ msg, sender }) => {
       setMsg((msgs) => [...msgs, { sender, msg }]);
     });
   }, []);
 
   // Scroll to Bottom of Message List
-  useEffect(() => {scrollToBottom()}, [msg])
+  useEffect(() => {
+    scrollToBottom();
+  }, [msg]);
 
   const scrollToBottom = () => {
-    messagesEndRef.current.scrollIntoView({ behavior: 'smooth'});
-  }
+    messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+  };
 
   const sendMessage = (e) => {
-    if (e.key === 'Enter') {
+    if (e.key === "Enter") {
       const msg = e.target.value;
 
       if (msg) {
-        socket.emit('BE-send-message', { roomId, msg, sender: currentUser });
-        inputRef.current.value = '';
+        socket.emit("BE-send-message", { roomId, msg, sender: currentUser });
+        inputRef.current.value = "";
       }
     }
   };
 
   return (
-    <ChatContainer className={display ? '' : 'width0'}>
+    <ChatContainer className={display ? "" : "width0"}>
       <TopHeader>Group Chat Room</TopHeader>
       <ChatArea>
         <MessageList>
@@ -55,7 +57,7 @@ const Chat = ({ display, roomId }) => {
                 );
               }
             })}
-            <div style={{float:'left', clear: 'both'}} ref={messagesEndRef} />
+          <div style={{ float: "left", clear: "both" }} ref={messagesEndRef} />
         </MessageList>
       </ChatArea>
       <BottomInput
@@ -82,7 +84,7 @@ const TopHeader = styled.div`
   margin-top: 15px;
   font-weight: 600;
   font-size: 20px;
-  color: black;
+  color: #c34400;
 `;
 
 const ChatArea = styled.div`
@@ -98,7 +100,7 @@ const MessageList = styled.div`
   width: 100%;
   flex-direction: column;
   padding: 15px;
-  color: #454552;
+  color: #c34400;
 `;
 
 const Message = styled.div`
@@ -120,9 +122,9 @@ const Message = styled.div`
     width: auto;
     padding: 9px;
     margin-top: 3px;
-    border: 1px solid rgb(78, 161, 211, 0.3);
+    border: 1px solid #c34400;
     border-radius: 15px;
-    box-shadow: 0px 0px 3px #4ea1d3;
+    box-shadow: 0px 0px 3px #c34400;
     font-size: 14px;
   }
 `;
@@ -146,9 +148,9 @@ const UserMessage = styled.div`
     padding: 9px;
     margin-top: 3px;
     margin-right: 30px;
-    border: 1px solid rgb(78, 161, 211, 0.3);
+    border: 1px solid #c34400;
     border-radius: 15px;
-    background-color: #4ea1d3;
+    background-color: #c34400;
     color: white;
     font-size: 14px;
     text-align: left;
@@ -160,7 +162,7 @@ const BottomInput = styled.input`
   width: 100%;
   height: 8%;
   padding: 15px;
-  border-top: 1px solid rgb(69, 69, 82, 0.25);
+  border-top: 1px solid #c34400;
   box-sizing: border-box;
   opacity: 0.7;
 

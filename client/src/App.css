@@ -1,7 +1,7 @@
 .App {
   text-align: center;
 
-  background-color: #454552;
+  background-color: #1d1d1d;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -11,3 +11,6 @@
   color: white;
 }
 
+.no-hover {
+  pointer-events: none; /* Disable pointer events on the options */
+}
