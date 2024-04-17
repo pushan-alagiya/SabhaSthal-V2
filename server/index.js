@@ -2,12 +2,34 @@ const express = require("express");
 const app = express();
 const http = require("http").createServer(app);
 const io = require("socket.io")(http);
-const PORT = process.env.PORT || 3001;
+const bodyParser = require("body-parser");
+
+let PORT;
 const path = require("path");
 var cors = require("cors");
+const socketManager = require("./sockets/sockerManager");
+const userRouter = require("./routes/userRoutes/user-routes");
+const adminRouter = require("./routes/adminRoutes/admin-routes");
+
+// Load env variables
+require("dotenv").config();
+
+// Body Parser Middleware
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+
+// =============== Load database ============================
+
+require("./database/db");
+
+// =============== Routes ==================================
+
+app.use(userRouter);
+app.use(adminRouter);
+
+// =============== CORS =====================================
 
 app.use(cors());
-
 app.use(function (req, res, next) {
   res.header("Access-Control-Allow-Origin", "*");
   res.header("Access-Control-Allow-Methods", "GET, PUT, POST");
@@ -18,19 +40,25 @@ app.use(function (req, res, next) {
   next();
 });
 
-let socketList = {};
+// ============= static Path =====================================
 
 app.use(express.static(path.join(__dirname, "public")));
 
+// ============= Production specification ========================
+
 if (process.env.NODE_ENV === "production") {
+  PORT = process.env.PORT_PROD || 5000;
   app.use(express.static(path.join(__dirname, "../client/build")));
 
   app.get("/*", function (req, res) {
     res.sendFile(path.join(__dirname, "../client/build/index.html"));
   });
+} else {
+  PORT = process.env.PORT_DEV || 3001;
 }
 
-// Route
+// ================== Route ping =================================
+
 app.get("/ping", (req, res) => {
   res
     .send({
@@ -39,109 +67,9 @@ app.get("/ping", (req, res) => {
     .status(200);
 });
 
-// Socket
-io.on("connection", (socket) => {
-  console.log(`New User connected: ${socket.id}`);
-
-  socket.on("disconnect", () => {
-    socket.disconnect();
-    console.log("User disconnected!");
-  });
-
-  socket.on("BE-check-user", ({ roomId, userName }) => {
-    let error = false;
-
-    io.sockets.in(roomId).clients((err, clients) => {
-      clients.forEach((client) => {
-        if (socketList[client] == userName) {
-          error = true;
-        }
-      });
-      socket.emit("FE-error-user-exist", { error });
-    });
-  });
-
-  /**
-   * Join Room
-   */
-  socket.on("BE-join-room", ({ roomId, userName }) => {
-    // Socket Join RoomName
-    socket.join(roomId);
-    socketList[socket.id] = { userName, video: true, audio: true };
-
-    // Set User List
-    io.sockets.in(roomId).clients((err, clients) => {
-      try {
-        const users = [];
-        clients.forEach((client) => {
-          // Add User List
-          users.push({ userId: client, info: socketList[client] });
-        });
-        socket.broadcast.to(roomId).emit("FE-user-join", users);
-        // io.sockets.in(roomId).emit('FE-user-join', users);
-      } catch (e) {
-        io.sockets.in(roomId).emit("FE-error-user-exist", { err: true });
-      }
-    });
-  });
-
-  socket.on("BE-call-user", ({ userToCall, from, signal }) => {
-    io.to(userToCall).emit("FE-receive-call", {
-      signal,
-      from,
-      info: socketList[socket.id],
-    });
-  });
-
-  socket.on("BE-accept-call", ({ signal, to }) => {
-    io.to(to).emit("FE-call-accepted", {
-      signal,
-      answerId: socket.id,
-    });
-  });
-
-  socket.on("BE-send-message", ({ roomId, msg, sender }) => {
-    io.sockets.in(roomId).emit("FE-receive-message", { msg, sender });
-  });
-
-  socket.on("BE-leave-room", ({ roomId, leaver }) => {
-    delete socketList[socket.id];
-    socket.broadcast
-      .to(roomId)
-      .emit("FE-user-leave", { userId: socket.id, userName: [socket.id] });
-    io.sockets.sockets[socket.id].leave(roomId);
-  });
-
-  socket.on("BE-toggle-camera-audio", ({ roomId, switchTarget }) => {
-    if (switchTarget === "video") {
-      socketList[socket.id].video = !socketList[socket.id].video;
-    } else {
-      socketList[socket.id].audio = !socketList[socket.id].audio;
-    }
-    socket.broadcast
-      .to(roomId)
-      .emit("FE-toggle-camera", { userId: socket.id, switchTarget });
-  });
-
-  socket.on("whiteboard-data", ({ roomId, data }) => {
-    // Broadcast the drawing data to all other peers in the same room
-    console.log("Canvas data:", data);
-
-    io.to(roomId).emit("FE-whiteboard-data", { data });
-  });
-
-  // Emit the new state to all peers in the room
-  socket.on("BE-toggle-whiteboard", ({ roomId, whiteboardVisible }) => {
-    console.log(whiteboardVisible);
-    io.to(roomId).emit("FE-toggle-whiteboard", { whiteboardVisible });
-  });
-
-  socket.on("clear-canvas", ({ roomId }) => {
-    // Broadcast the clear-canvas event to all clients in the same room
-    io.to(roomId).emit("clear-canvas", { roomId });
-  });
-});
+// ================== Sockets ====================================
+socketManager(io);
 
 http.listen(PORT, () => {
-  console.log("Connected : 3001");
+  console.log("Connected : ", PORT);
 });

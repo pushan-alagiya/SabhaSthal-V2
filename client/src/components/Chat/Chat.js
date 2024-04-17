@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from "react";
 import styled from "styled-components";
 import socket from "../../socket";
 
-const Chat = ({ display, roomId }) => {
+const Chat = ({ roomId }) => {
   const currentUser = sessionStorage.getItem("user");
   const [msg, setMsg] = useState([]);
   const messagesEndRef = useRef(null);
@@ -35,7 +35,7 @@ const Chat = ({ display, roomId }) => {
   };
 
   return (
-    <ChatContainer className={display ? "" : "width0"}>
+    <ChatContainer>
       <TopHeader>Group Chat Room</TopHeader>
       <ChatArea>
         <MessageList>
@@ -72,7 +72,7 @@ const Chat = ({ display, roomId }) => {
 const ChatContainer = styled.div`
   display: flex;
   flex-direction: column;
-  width: 25%;
+  min-width: 20%;
   hieght: 100%;
   background-color: white;
   transition: all 0.5s ease;
@@ -84,6 +84,7 @@ const TopHeader = styled.div`
   margin-top: 15px;
   font-weight: 600;
   font-size: 20px;
+  margin-top: 25px;
   color: #c34400;
 `;
 
@@ -158,13 +159,22 @@ const UserMessage = styled.div`
 `;
 
 const BottomInput = styled.input`
-  bottom: 0;
-  width: 100%;
-  height: 8%;
   padding: 15px;
-  border-top: 1px solid #c34400;
+  position: relative;
+  border: 3px solid #c34400;
   box-sizing: border-box;
-  opacity: 0.7;
+  font-size: 16px;
+  border-radius: 40px;
+  right: 0;
+  left: 0;
+  bottom: 20px;
+  width: 18vw;
+  height: 8%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #fff;
+  margin: auto;
 
   :focus {
     outline: none;

@@ -367,24 +367,19 @@ const Room = (props) => {
   // ============= EXPAND SHARING ==========================
   const expandScreen = (e) => {
     const elem = e.target;
-
     if (elem.requestFullscreen) {
       elem.requestFullscreen();
-    } else if (elem.mozRequestFullScreen) {
-      /* Firefox */
-      elem.mozRequestFullScreen();
-    } else if (elem.webkitRequestFullscreen) {
-      /* Chrome, Safari & Opera */
-      elem.webkitRequestFullscreen();
-    } else if (elem.msRequestFullscreen) {
-      /* IE/Edge */
-      elem.msRequestFullscreen();
+    } else if (elem.webkitFullscreenElement) {
+      elem.webkitExitFullscreen();
+    } else if (elem.mozFullScreenElement) {
+      elem.mozCancelFullScreen();
+    } else if (elem.msFullscreenElement) {
+      elem.msExitFullscreen();
     }
   };
 
   const clickBackground = () => {
     if (!showVideoDevices) return;
-
     setShowVideoDevices(false);
   };
 
@@ -504,7 +499,7 @@ const Room = (props) => {
           toggleWhiteboard={toggleWhiteboard} // Pass the toggleWhiteboard function to the BottomBar component
         />
       </VideoAndBarContainer>
-      <Chat display={displayChat} roomId={roomId} />
+      {displayChat && <Chat roomId={roomId} />}
       {whiteboardVisible && (
         <Whiteboard
           socket={socket}
@@ -521,7 +516,7 @@ const Room = (props) => {
 const RoomContainer = styled.div`
   display: flex;
   width: 100%;
-  max-height: 100vh;
+  max-height: 100%;
   flex-direction: row;
 `;
 
@@ -536,6 +531,7 @@ const VideoContainer = styled.div`
   padding: 15px;
   box-sizing: border-box;
   gap: 10px;
+  border-radius: 10px;
 `;
 
 const VideoAndBarContainer = styled.div`
@@ -544,7 +540,9 @@ const VideoAndBarContainer = styled.div`
   height: 100vh;
 `;
 
-const MyVideo = styled.video``;
+const MyVideo = styled.video`
+  border-radius: 10px;
+`;
 
 const VideoBox = styled.div`
   position: relative;
@@ -557,7 +555,7 @@ const VideoBox = styled.div`
     width: 100%;
     height: 100%;
   }
-
+  border-radius: 20px;
   :hover {
     > i {
       display: block;

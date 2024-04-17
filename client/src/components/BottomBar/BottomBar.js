@@ -64,15 +64,15 @@ const BottomBar = ({
           </div>
           Audio
         </CameraButton>
+      </Left>
+      <Center>
         {/* Toggle Whiteboard Button */}
-        <CameraButton onClick={toggleWhiteboard}>
+        <ChatButton onClick={toggleWhiteboard}>
           <div>
             <FaIcon className="fas fa-chalkboard"></FaIcon>
           </div>
           Board
-        </CameraButton>
-      </Left>
-      <Center>
+        </ChatButton>
         <ChatButton onClick={clickChat}>
           <div>
             <FaIcon className="fas fa-comments"></FaIcon>
@@ -97,15 +97,18 @@ const BottomBar = ({
 
 const Bar = styled.div`
   position: absolute;
+  border-radius: 40px;
   right: 0;
-  bottom: 0;
-  width: 100%;
+  left: 0;
+  bottom: 20px;
+  width: 95%;
   height: 8%;
   display: flex;
   justify-content: center;
   align-items: center;
   font-weight: 500;
   background-color: #c34400;
+  margin: auto;
 `;
 const Left = styled.div`
   display: flex;

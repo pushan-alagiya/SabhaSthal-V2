@@ -17,7 +17,7 @@ const Whiteboard = ({
   useEffect(() => {
     const canvas = canvasRef.current;
     canvas.width = window.innerWidth / 2;
-    canvas.height = window.innerHeight * 0.92;
+    canvas.height = window.innerHeight;
 
     const ctx = canvas.getContext("2d");
     ctx.lineCap = "round";
@@ -181,6 +181,26 @@ const Whiteboard = ({
 
   return (
     <WhiteboardContainer>
+      <div
+        style={{
+          overflow: "hidden",
+          position: "absolute",
+          right: "1vw",
+          top: "0",
+          width: "28vw",
+          height: "8%",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          margin: "auto",
+          marginTop: "10px",
+          fontWeight: "600",
+          fontSize: "20px",
+          color: "#c34400",
+        }}
+      >
+        Whiteboard
+      </div>
       <canvas
         ref={canvasRef}
         onMouseDown={handleMouseDown}
@@ -189,9 +209,27 @@ const Whiteboard = ({
         style={{
           cursor: isEraser ? "cell" : "crosshair",
           border: "1px solid #ccc",
+          bottom: "0",
         }}
       />
-      <div style={{ marginTop: "10px", overflow: "scroll" }}>
+      <div
+        style={{
+          marginTop: "10px",
+          overflow: "hidden",
+          position: "absolute",
+          borderRadius: "40px",
+          right: "1vw",
+          bottom: "0",
+          width: "28vw",
+          height: "8%",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          backgroundColor: "#1a1a1a",
+          margin: "auto",
+          marginBottom: "20px",
+        }}
+      >
         <select
           value={penColor}
           onChange={handleColorChange}
@@ -199,7 +237,7 @@ const Whiteboard = ({
             marginRight: "20px",
             padding: "5px",
             borderRadius: "5px",
-            border: "1px solid #ccc",
+            border: "2px solid #ccc",
             backgroundColor: penColor,
           }}
         >

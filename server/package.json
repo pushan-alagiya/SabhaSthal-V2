@@ -4,17 +4,23 @@
   "description": "video call server",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js",
-    "dev": "nodemon index.js",
+    "start": "set NODE_ENV=production&&node index.js",
+    "dev": "set NODE_ENV=development&&nodemon index.js ",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Hyunse Kim",
   "license": "ISC",
   "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "body-parser": "^1.20.2",
     "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
     "express": "^4.17.1",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.3.2",
     "morgan": "^1.10.0",
     "nodemon": "^2.0.4",
-    "socket.io": "^2.3.0"
+    "socket.io": "^2.3.0",
+    "validator": "^13.11.0"
   }
 }

@@ -37,9 +37,9 @@ video::-webkit-media-controls {
   display: none !important;
 }
 
-.width0 {
+/* .width0 {
   width: 0% !important;
-}
+} */
 
 .width-peer0 {
   width: 45% !important;
