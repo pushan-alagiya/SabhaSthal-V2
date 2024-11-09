@@ -11,7 +11,7 @@
 - ![All in one](https://github.com/pushan-alagiya/SabhaSthal-V2/blob/main/Screenshorts/Screenshot%20From%202024-11-09%2021-22-01.png?raw=true)
 - ![All in one](https://github.com/pushan-alagiya/SabhaSthal-V2/blob/main/Screenshorts/Screenshot%20From%202024-11-09%2021-26-52.png?raw=true)
 - ![All in one](https://github.com/pushan-alagiya/SabhaSthal-V2/blob/main/Screenshorts/Screenshot%20From%202024-11-09%2021-27-41.png?raw=true)
-- ![All in one](https://github.com/pushan-alagiya/SabhaSthal-V2/blob/main/Screenshorts/Screenshot%20From%202024-11-09%2021-27-41.png?raw=true)
+- ![All in one](https://github.com/pushan-alagiya/SabhaSthal-V2/blob/main/Screenshorts/Screenshot%20From%202024-11-09%2021-29-01.png?raw=true)
 - ![All in one](https://github.com/pushan-alagiya/SabhaSthal-V2/blob/main/Screenshorts/Screenshot%20From%202024-11-09%2021-29-57.png?raw=true)
 </details>
 
